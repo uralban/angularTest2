@@ -1,0 +1,14 @@
+<div class="d-flex flex-row w-100">
+  <div class=""
+       *ngFor="let element of elements"
+       [style.width]="element.wrapperWidth"
+       (click)="selectArea(element)"
+  >
+    <div class="diagram-element"
+         [style.marginTop]="element.margin"
+         [style.height]="element.height"
+         [style.borderWidth]="element.border"
+         [style.borderColor]="element.color"
+    ></div>
+  </div>
+</div>

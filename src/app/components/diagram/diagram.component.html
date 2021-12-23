@@ -1,0 +1,45 @@
+<div class="container">
+  <div class="row">
+    <div class="col-1 d-flex flex-column align-items-end justify-content-around">
+      <span class="font-weight-bold text-danger">
+        OFF
+      </span>
+      <span class="font-weight-bold text-secondary">
+        SB
+      </span>
+      <span class="font-weight-bold text-success">
+        D
+      </span>
+      <span class="font-weight-bold text-warning">
+        ON
+      </span>
+    </div>
+    <div class="col-10">
+      <div class="graph-wrapper border">
+        <app-element></app-element>
+      </div>
+    </div>
+    <div class="col-1 d-flex flex-column align-items-start justify-content-around">
+      <span class="font-weight-bold text-danger">
+        {{offTime/2 | date: 'hh:mm'}}
+      </span>
+      <span class="font-weight-bold text-secondary">
+        {{sbTime/2 | date: 'hh:mm'}}
+      </span>
+      <span class="font-weight-bold text-success">
+        {{dTime/2 | date: 'hh:mm'}}
+      </span>
+      <span class="font-weight-bold text-warning">
+        {{onTime/2 | date: 'hh:mm'}}
+      </span>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-1"></div>
+    <div class="col-10">
+      <app-selector></app-selector>
+    </div>
+    <div class="col-1"></div>
+  </div>
+</div>
+
