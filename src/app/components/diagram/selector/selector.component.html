@@ -1,3 +1,17 @@
 <div class="d-flex flex-row w-100">
-
+  <div class="position-relative markers-wrapper"
+       [style.width]="containerWidth + '%'"
+       [style.height]="'20px'"
+       [style.marginLeft]="containerOffset+'%'"
+       *ngIf="showMarkers"
+  >
+    <img src="assets/marker.png"
+         alt="markerLeft"
+         class="marker-left position-absolute"
+         width="15"
+         [style.left]="offsetLeft"
+         (mousedown)="leftMarkerPress($event)"
+    >
+    <img src="assets/marker.png" alt="markerRight" class="marker-right position-absolute" width="15" [style.right]="offsetRight">
+  </div>
 </div>

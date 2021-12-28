@@ -22,59 +22,74 @@ export interface Event {
 
 export class DataService {
 
-  public currentEvent: BehaviorSubject<Event> = new BehaviorSubject(null);
+  public currentEvent: BehaviorSubject<Event[]> = new BehaviorSubject(null);
+  public actualSchedule: BehaviorSubject<Event[]> = new BehaviorSubject(null);
 
-  public schedule: Event[] = [
-    {
-      event: 'OFF',
-      startTime: -10800000,
-      endTime: 10800000,
-      startLat: 2,
-      startLan: 2,
-      endLat: 3,
-      endLan: 3
-    },
-    {
-      event: 'SB',
-      startTime: 10800000,
-      endTime: 32400000,
-      startLat: 2,
-      startLan: 2,
-      endLat: 3,
-      endLan: 3
-    },
-    {
-      event: 'D',
-      startTime: 32400000,
-      endTime: 54000000,
-      startLat: 2,
-      startLan: 2,
-      endLat: 3,
-      endLan: 3
-    },
-    {
-      event: 'ON',
-      startTime: 54000000,
-      endTime: 64800000,
-      startLat: 2,
-      startLan: 2,
-      endLat: 3,
-      endLan: 3
-    },
-    {
-      event: 'SB',
-      startTime: 64800000,
-      endTime: 75600000,
-      startLat: 2,
-      startLan: 2,
-      endLat: 3,
-      endLan: 3
-    },
-  ];
+  private schedule: Event[] = [];
 
-  constructor() { }
+  constructor() {
+    if (this.schedule.length === 0) {
+      this.schedule = [
+        {
+          event: 'OFF',
+          startTime: 75600000,
+          endTime: 97200000,
+          startLat: 6,
+          startLan: 6,
+          endLat: 6,
+          endLan: 6
+        },
+        {
+          event: 'SB',
+          startTime: 97200000,
+          endTime: 118800000,
+          startLat: 6,
+          startLan: 6,
+          endLat: 6,
+          endLan: 6
+        },
+        {
+          event: 'D',
+          startTime: 118800000,
+          endTime: 140400000,
+          startLat: 6,
+          startLan: 6,
+          endLat: 11,
+          endLan: 11
+        },
+        {
+          event: 'ON',
+          startTime: 140400000,
+          endTime: 151200000,
+          startLat: 8,
+          startLan: 8,
+          endLat: 9,
+          endLan: 9
+        },
+        {
+          event: 'SB',
+          startTime: 151200000,
+          endTime: 162000000,
+          startLat: 9,
+          startLan: 9,
+          endLat: 9,
+          endLan: 9
+        },
+      ];
+      this.setSchedule(this.schedule);
+    }
+  }
 
-  public setCurrentEvent(event: Event): void {
+  public setSchedule(schedule: Event[]): void {
+    this.schedule = schedule;
+    this.actualSchedule.next(schedule);
+  }
+
+  public getSchedule(): Event[] {
+    return this.schedule;
+  }
+
+  public setCurrentEvent(event: Event[]): void {
     this.currentEvent.next(event);
   }
 }

@@ -6,8 +6,8 @@ import { DiagramComponent } from './components/diagram/diagram.component';
 import { MapComponent } from './components/map/map.component';
 import { DetailsComponent } from './components/details/details.component';
 import { ElementComponent } from './components/diagram/element/element.component';
-import { RefDirective } from './directives/ref.directive';
 import { SelectorComponent } from './components/diagram/selector/selector.component';
+import { EventNamePipe } from './pipes/event-name.pipe';
 
 @NgModule({
   declarations: [
@@ -16,16 +16,13 @@ import { SelectorComponent } from './components/diagram/selector/selector.compon
     MapComponent,
     DetailsComponent,
     ElementComponent,
-    RefDirective,
-    SelectorComponent
+    SelectorComponent,
+    EventNamePipe
   ],
   imports: [
     BrowserModule
   ],
   providers: [],
-  entryComponents:[
-    ElementComponent
-  ],
   bootstrap: [
     AppComponent
   ]

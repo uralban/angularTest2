@@ -1,1 +1,32 @@
-<p>details works!</p>
+<div class="pl-5" *ngIf="element; else nothingSelect">
+  <div class="pb-4">
+    <span class="font-weight-bold">
+      Selected Event:
+    </span>
+    <span class="h3" [style.color]="element.color">
+      {{ element.event | eventName }}
+    </span>
+  </div>
+  <div class="pb-2">
+    <span class="font-weight-bold">
+      Started at:
+    </span>
+    <span class="">
+      {{ element.startTime | date: 'hh:mm a' }}
+    </span>
+  </div>
+  <div class="pb-4">
+    <span class="font-weight-bold">
+      Finished at:
+    </span>
+    <span class="">
+      {{ element.endTime | date: 'hh:mm a' }}
+    </span>
+  </div>
+  <div class="">
+    <button class="btn btn-info" disabled>Save changes</button>
+  </div>
+</div>
+<ng-template #nothingSelect>
+  <div class="h2 pl-5" >Select event first, please</div>
+</ng-template>
