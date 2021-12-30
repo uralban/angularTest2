@@ -150,7 +150,9 @@ export class ElementComponent implements OnInit, OnDestroy {
   public selectArea(element: Event): void {
     const elementsArr: Event[] = [];
     const elementIndex: number = this.elements.indexOf(element);
-
+    //получить основное расписание
+    //обновить график
+    //проверить правильность элемента снизу (скорее всего, индекс оф не сработает)
     elementsArr.push((elementIndex === 0) ? null : this.elements[elementIndex - 1]);
     elementsArr.push(element);
     elementsArr.push((elementIndex === this.elements.length-1) ? null : this.elements[elementIndex + 1]);

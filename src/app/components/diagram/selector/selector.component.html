@@ -4,6 +4,7 @@
        [style.height]="'20px'"
        [style.marginLeft]="containerOffset+'%'"
        *ngIf="showMarkers"
+       (mousemove)="markerMove($event)"
   >
     <img src="assets/marker.png"
          alt="markerLeft"
@@ -11,7 +12,15 @@
          width="15"
          [style.left]="offsetLeft"
          (mousedown)="leftMarkerPress($event)"
+         (mouseup)="leftMarkerPressUp()"
     >
-    <img src="assets/marker.png" alt="markerRight" class="marker-right position-absolute" width="15" [style.right]="offsetRight">
+    <img src="assets/marker.png"
+         alt="markerRight"
+         class="marker-right position-absolute"
+         width="15"
+         [style.right]="offsetRight"
+         (mousedown)="rightMarkerPress($event)"
+         (mouseup)="rightMarkerPressUp()"
+    >
   </div>
 </div>

@@ -24,8 +24,11 @@ export class DataService {
 
   public currentEvent: BehaviorSubject<Event[]> = new BehaviorSubject(null);
   public actualSchedule: BehaviorSubject<Event[]> = new BehaviorSubject(null);
+  public newStartTime: BehaviorSubject<number> = new BehaviorSubject(null);
+  public newEndTime: BehaviorSubject<number> = new BehaviorSubject(null);
 
   private schedule: Event[] = [];
+  private newSchedule: Event[] = [];
 
   constructor() {
     if (this.schedule.length === 0) {
@@ -81,15 +84,31 @@ export class DataService {
   }
 
   public setSchedule(schedule: Event[]): void {
-    this.schedule = schedule;
+    this.newSchedule = JSON.parse(JSON.stringify(schedule));
     this.actualSchedule.next(schedule);
+  }
+
+  public saveSchedule(schedule: Event[]): void {
+    this.schedule = schedule;
   }
 
   public getSchedule(): Event[] {
     return this.schedule;
   }
 
+  public getNewSchedule(): Event[] {
+    return this.newSchedule;
+  }
+
   public setCurrentEvent(event: Event[]): void {
     this.currentEvent.next(event);
+  }
+
+  public setNewStartTime(time: number): void {
+    this.newStartTime.next(time);
+  }
+
+  public setNewEndTime(time: number): void {
+    this.newEndTime.next(time);
   }
 }

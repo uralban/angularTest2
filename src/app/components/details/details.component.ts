@@ -11,6 +11,7 @@ export class DetailsComponent implements OnInit, OnDestroy {
 
   private subscriptions: Subscription[] = [];
   public element: Event;
+  public disabledBtn: boolean = true;
 
   constructor(
     private dataService: DataService
@@ -20,7 +21,26 @@ export class DetailsComponent implements OnInit, OnDestroy {
     this.subscriptions.push(
       this.dataService.currentEvent.subscribe(eventArr => {
         if (eventArr) {
-          this.element = eventArr[1];
+          this.element = JSON.parse(JSON.stringify(eventArr[1]));
+          this.disabledBtn = true;
+        }
+      })
+    );
+
+    this.subscriptions.push(
+      this.dataService.newStartTime.subscribe(newStartTime => {
+        if (newStartTime) {
+          this.disabledBtn = (this.element.startTime === newStartTime);
+          this.element.startTime = newStartTime;
+        }
+      })
+    );
+
+    this.subscriptions.push(
+      this.dataService.newEndTime.subscribe(newEndTime => {
+        if (newEndTime) {
+          this.disabledBtn = (this.element.endTime === newEndTime);
+          this.element.endTime = newEndTime;
         }
       })
     );

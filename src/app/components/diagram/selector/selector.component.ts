@@ -1,12 +1,7 @@
 import {
-  AfterViewChecked,
-  AfterViewInit,
   Component,
-  ElementRef,
   OnDestroy,
-  OnInit,
-  Renderer2,
-  ViewChild
+  OnInit
 } from '@angular/core';
 import {Subscription} from "rxjs";
 import {DataService, Event} from "../../../services/data.service";
@@ -16,9 +11,7 @@ import {DataService, Event} from "../../../services/data.service";
   templateUrl: './selector.component.html',
   styleUrls: ['./selector.component.scss']
 })
-export class SelectorComponent implements OnInit, OnDestroy, AfterViewChecked {
-
-  @ViewChild('#markerLeft') markerLeft: ElementRef;
+export class SelectorComponent implements OnInit, OnDestroy {
 
   private subscriptions: Subscription[] = [];
   public showMarkers: boolean = false;
@@ -28,21 +21,33 @@ export class SelectorComponent implements OnInit, OnDestroy, AfterViewChecked {
   public offsetRight: string = '';
   private allWidth: number = 0;
   private koef: number = 21600000/222;
-  private leftMarker: any;
+  private startLeft: number[] = [];
+  private startRight: number = 0;
+  private offsetLeftInit: number;
+  private newOffsetLeft: number;
+  private offsetRightInit: number;
+  private currentElementWidth: number = 0;
+  private events: Event[] = [];
+  private newSchedule: Event[] = [];
+  private timeShift: number = 0;
+  private timeShiftLeft: number = 0;
+  private timeShiftRight: number = 0;
 
   constructor(
-    private dataService: DataService,
-    public renderer: Renderer2
+    private dataService: DataService
   ) { }
 
   public ngOnInit(): void {
     this.subscriptions.push(
       this.dataService.currentEvent.subscribe(event => {
         if (event){
+          this.events = JSON.parse(JSON.stringify(event));
           this.containerWidth = 0;
           this.offsetLeft = '';
           this.offsetRight = '';
           this.allWidth = 0;
+          this.currentElementWidth = 0;
+          this.newSchedule = [];
           event.forEach(element => {
             if (element) {
               this.containerWidth += Number(element.wrapperWidth)
@@ -50,35 +55,32 @@ export class SelectorComponent implements OnInit, OnDestroy, AfterViewChecked {
             }
           });
 
+          this.currentElementWidth = event[1].endTime - event[1].startTime;
+
           this.offsetLeft = this.setPosition(event[0]);
           this.offsetRight = this.setPosition(event[2]);
 
 
-          const firstIndex: number = this.dataService.getSchedule().indexOf(event[0]);
+          // const firstIndex: number = this.dataService.getNewSchedule().indexOf(event[0]);
+          let firstIndex: number = -1;
+          this.dataService.getNewSchedule().find((element, index) => {
+            if (event[0]) {
+              if (element.event === event[0].event && element.startTime === event[0].startTime && element.endTime === event[0].endTime) {
+                firstIndex = index;
+                return true;
+              }
+            }
+          });
           this.containerOffset = 0;
           if (firstIndex > 0) {
             for (let i: number = 0; i < firstIndex; i++) {
               this.containerOffset += Number(this.dataService.getSchedule()[i].wrapperWidth);
             }
           }
-
-          //Нарисовать маркеры
-          //Повесить на них события
-
           this.showMarkers = true;
-
-          console.log('event', event);
-          //Оперативно изменять значения времени в actualSchedule
-          //При нажатии на кнопку - сохранять текущие данные
-          // this.leftMarker = this.renderer.selectRootElement('#marker-left');
-          // console.log('this.leftMarker', this.leftMarker)
         }
       })
     );
-  }
-
-  public ngAfterViewChecked(): void {
-    // console.log(this.markerLeft);
   }
 
   public ngOnDestroy(): void {
@@ -94,12 +96,74 @@ export class SelectorComponent implements OnInit, OnDestroy, AfterViewChecked {
   }
 
   public leftMarkerPress(event: any): void {
-    console.log('leftMarkerPress', event.pageX);
-
+    this.startLeft.push(event.pageX);
+    this.startRight = 0;
+    this.offsetLeftInit = Number(this.offsetLeft.replace('%', ''));
   }
 
-  public leftMarkerMove(event: any): void {
-    console.log('leftMarkerMove', event.pageX);
+  public rightMarkerPress(event: any): void {
+    this.startRight = event.pageX;
+    this.startLeft = [];
+    this.offsetRightInit = Number(this.offsetRight.replace('%', ''));
+  }
 
+  public markerMove(event: any): void {
+    if (this.startLeft.length) {
+      this.moveLeft(event.pageX);
+    } else if (this.startRight) {
+      this.moveRight(event.pageX);
+    }
+  }
+
+  private moveLeft(pageX): void {
+    this.newOffsetLeft = this.offsetLeftInit + (pageX - this.startLeft[0]) * this.koef * 100 / this.allWidth;
+    if (this.newOffsetLeft >= 0 && this.newOffsetLeft < this.currentElementWidth * 100 / this.allWidth + this.offsetLeftInit && this.events[0]) {
+      this.offsetLeft = this.newOffsetLeft + '%';
+      this.timeShift = Number(((this.offsetLeftInit - this.newOffsetLeft)*this.allWidth/100).toFixed(0));
+      this.updateSchedule();
+    }
+  }
+
+  private moveRight(pageX): void {
+    const newOffsetRight = this.offsetRightInit + (pageX - this.startRight) * -1 * this.koef * 100 / this.allWidth;
+    if (newOffsetRight >= 0 && newOffsetRight < this.currentElementWidth * 100 / this.allWidth + this.offsetRightInit && this.events[2]) {
+      this.offsetRight = newOffsetRight + '%';
+    }
+  }
+
+  public leftMarkerPressUp() {
+    // const timeShift: number = Number(((this.offsetLeftInit - this.newOffsetLeft)*this.allWidth/100).toFixed(0));
+    // this.updateSchedule(timeShift);
+    this.startLeft = [];
+    // this.newSchedule = JSON.parse(JSON.stringify(this.dataService.getSchedule()));
+    // if (this.events[0]) this.events[0].endTime = this.newSchedule[this.timeShiftLeft].endTime;
+    // this.events[1].startTime = this.newSchedule[this.timeShiftLeft].endTime;
+    // console.log('this.timeShift', this.timeShift);
+    // console.log('this.timeShiftLeft', this.newSchedule[this.timeShiftLeft].endTime);
+  }
+
+  public rightMarkerPressUp() {
+    this.startRight = 0;
+  }
+
+  public updateSchedule(): void {
+    const newSchedule = JSON.parse(JSON.stringify(this.dataService.getSchedule()));
+    // const newSchedule = (this.newSchedule.length) ? this.newSchedule : JSON.parse(JSON.stringify(this.dataService.getSchedule()));
+    const newSchedule2 = newSchedule.map((scheduleElement) => {
+      if (this.events[0]) {
+        if (scheduleElement.event === this.events[0].event && scheduleElement.endTime === this.events[0].endTime) {
+          console.log('endTime');
+          scheduleElement.endTime = this.events[0].endTime - this.timeShift;
+          // this.timeShiftLeft = (this.timeShiftLeft) ? this.timeShiftLeft : index;
+        } else if (scheduleElement.event === this.events[1].event && scheduleElement.startTime === this.events[1].startTime) {
+          scheduleElement.startTime = this.events[1].startTime - this.timeShift;
+          this.dataService.setNewStartTime(scheduleElement.startTime);
+        }
+      }
+      return scheduleElement;
+    });
+    // console.log('newSchedule2', newSchedule2);
+    //дернуть кнопку
+    this.dataService.setSchedule(newSchedule2);
   }
 }
