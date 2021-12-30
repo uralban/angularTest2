@@ -88,8 +88,9 @@ export class DataService {
     this.actualSchedule.next(schedule);
   }
 
-  public saveSchedule(schedule: Event[]): void {
-    this.schedule = schedule;
+  public saveSchedule(): void {
+    console.log(this.newSchedule)
+    this.schedule = JSON.parse(JSON.stringify(this.newSchedule));
   }
 
   public getSchedule(): Event[] {

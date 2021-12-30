@@ -4,8 +4,7 @@ import {Subscription} from "rxjs";
 
 @Component({
   selector: 'app-details',
-  templateUrl: './details.component.html',
-  styleUrls: ['./details.component.scss']
+  templateUrl: './details.component.html'
 })
 export class DetailsComponent implements OnInit, OnDestroy {
 
@@ -48,6 +47,11 @@ export class DetailsComponent implements OnInit, OnDestroy {
 
   public ngOnDestroy(): void {
     this.subscriptions.forEach(subscription => subscription.unsubscribe());
+  }
+
+  public saveData(): void {
+    this.dataService.saveSchedule();
+    this.disabledBtn = true;
   }
 
 }

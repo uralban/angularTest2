@@ -22,16 +22,14 @@ export class SelectorComponent implements OnInit, OnDestroy {
   private allWidth: number = 0;
   private koef: number = 21600000/222;
   private startLeft: number[] = [];
-  private startRight: number = 0;
+  private startRight: number[] = [];
   private offsetLeftInit: number;
   private newOffsetLeft: number;
+  private newOffsetRight: number;
   private offsetRightInit: number;
   private currentElementWidth: number = 0;
   private events: Event[] = [];
-  private newSchedule: Event[] = [];
   private timeShift: number = 0;
-  private timeShiftLeft: number = 0;
-  private timeShiftRight: number = 0;
 
   constructor(
     private dataService: DataService
@@ -47,7 +45,6 @@ export class SelectorComponent implements OnInit, OnDestroy {
           this.offsetRight = '';
           this.allWidth = 0;
           this.currentElementWidth = 0;
-          this.newSchedule = [];
           event.forEach(element => {
             if (element) {
               this.containerWidth += Number(element.wrapperWidth)
@@ -60,10 +57,8 @@ export class SelectorComponent implements OnInit, OnDestroy {
           this.offsetLeft = this.setPosition(event[0]);
           this.offsetRight = this.setPosition(event[2]);
 
-
-          // const firstIndex: number = this.dataService.getNewSchedule().indexOf(event[0]);
           let firstIndex: number = -1;
-          this.dataService.getNewSchedule().find((element, index) => {
+          this.dataService.getSchedule().find((element, index) => {
             if (event[0]) {
               if (element.event === event[0].event && element.startTime === event[0].startTime && element.endTime === event[0].endTime) {
                 firstIndex = index;
@@ -97,12 +92,12 @@ export class SelectorComponent implements OnInit, OnDestroy {
 
   public leftMarkerPress(event: any): void {
     this.startLeft.push(event.pageX);
-    this.startRight = 0;
+    this.startRight = [];
     this.offsetLeftInit = Number(this.offsetLeft.replace('%', ''));
   }
 
   public rightMarkerPress(event: any): void {
-    this.startRight = event.pageX;
+    this.startRight.push(event.pageX);
     this.startLeft = [];
     this.offsetRightInit = Number(this.offsetRight.replace('%', ''));
   }
@@ -110,7 +105,7 @@ export class SelectorComponent implements OnInit, OnDestroy {
   public markerMove(event: any): void {
     if (this.startLeft.length) {
       this.moveLeft(event.pageX);
-    } else if (this.startRight) {
+    } else if (this.startRight.length) {
       this.moveRight(event.pageX);
     }
   }
@@ -120,41 +115,33 @@ export class SelectorComponent implements OnInit, OnDestroy {
     if (this.newOffsetLeft >= 0 && this.newOffsetLeft < this.currentElementWidth * 100 / this.allWidth + this.offsetLeftInit && this.events[0]) {
       this.offsetLeft = this.newOffsetLeft + '%';
       this.timeShift = Number(((this.offsetLeftInit - this.newOffsetLeft)*this.allWidth/100).toFixed(0));
-      this.updateSchedule();
+      this.updateScheduleLeft();
     }
   }
 
   private moveRight(pageX): void {
-    const newOffsetRight = this.offsetRightInit + (pageX - this.startRight) * -1 * this.koef * 100 / this.allWidth;
-    if (newOffsetRight >= 0 && newOffsetRight < this.currentElementWidth * 100 / this.allWidth + this.offsetRightInit && this.events[2]) {
-      this.offsetRight = newOffsetRight + '%';
+    this.newOffsetRight = this.offsetRightInit + (pageX - this.startRight[0]) * -1 * this.koef * 100 / this.allWidth;
+    if (this.newOffsetRight >= 0 && this.newOffsetRight < this.currentElementWidth * 100 / this.allWidth + this.offsetRightInit && this.events[2]) {
+      this.offsetRight = this.newOffsetRight + '%';
+      this.timeShift = Number(((this.offsetRightInit - this.newOffsetRight)*this.allWidth/100).toFixed(0));
+      this.updateScheduleRight();
     }
   }
 
   public leftMarkerPressUp() {
-    // const timeShift: number = Number(((this.offsetLeftInit - this.newOffsetLeft)*this.allWidth/100).toFixed(0));
-    // this.updateSchedule(timeShift);
     this.startLeft = [];
-    // this.newSchedule = JSON.parse(JSON.stringify(this.dataService.getSchedule()));
-    // if (this.events[0]) this.events[0].endTime = this.newSchedule[this.timeShiftLeft].endTime;
-    // this.events[1].startTime = this.newSchedule[this.timeShiftLeft].endTime;
-    // console.log('this.timeShift', this.timeShift);
-    // console.log('this.timeShiftLeft', this.newSchedule[this.timeShiftLeft].endTime);
   }
 
   public rightMarkerPressUp() {
-    this.startRight = 0;
+    this.startRight = [];
   }
 
-  public updateSchedule(): void {
+  public updateScheduleLeft(): void {
     const newSchedule = JSON.parse(JSON.stringify(this.dataService.getSchedule()));
-    // const newSchedule = (this.newSchedule.length) ? this.newSchedule : JSON.parse(JSON.stringify(this.dataService.getSchedule()));
     const newSchedule2 = newSchedule.map((scheduleElement) => {
       if (this.events[0]) {
         if (scheduleElement.event === this.events[0].event && scheduleElement.endTime === this.events[0].endTime) {
-          console.log('endTime');
           scheduleElement.endTime = this.events[0].endTime - this.timeShift;
-          // this.timeShiftLeft = (this.timeShiftLeft) ? this.timeShiftLeft : index;
         } else if (scheduleElement.event === this.events[1].event && scheduleElement.startTime === this.events[1].startTime) {
           scheduleElement.startTime = this.events[1].startTime - this.timeShift;
           this.dataService.setNewStartTime(scheduleElement.startTime);
@@ -162,8 +149,22 @@ export class SelectorComponent implements OnInit, OnDestroy {
       }
       return scheduleElement;
     });
-    // console.log('newSchedule2', newSchedule2);
-    //дернуть кнопку
+    this.dataService.setSchedule(newSchedule2);
+  }
+
+  public updateScheduleRight(): void {
+    const newSchedule = JSON.parse(JSON.stringify(this.dataService.getSchedule()));
+    const newSchedule2 = newSchedule.map((scheduleElement) => {
+      if (this.events[2]) {
+        if (scheduleElement.event === this.events[1].event && scheduleElement.endTime === this.events[1].endTime) {
+          scheduleElement.endTime = this.events[1].endTime + this.timeShift;
+        } else if (scheduleElement.event === this.events[2].event && scheduleElement.startTime === this.events[2].startTime) {
+          scheduleElement.startTime = this.events[2].startTime + this.timeShift;
+          this.dataService.setNewEndTime(scheduleElement.startTime);
+        }
+      }
+      return scheduleElement;
+    });
     this.dataService.setSchedule(newSchedule2);
   }
 }

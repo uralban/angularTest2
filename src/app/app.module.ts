@@ -8,7 +8,6 @@ import { DetailsComponent } from './components/details/details.component';
 import { ElementComponent } from './components/diagram/element/element.component';
 import { SelectorComponent } from './components/diagram/selector/selector.component';
 import { EventNamePipe } from './pipes/event-name.pipe';
-import {DragDropModule} from '@angular/cdk/drag-drop';
 
 @NgModule({
   declarations: [
@@ -21,8 +20,7 @@ import {DragDropModule} from '@angular/cdk/drag-drop';
     EventNamePipe
   ],
   imports: [
-    BrowserModule,
-    DragDropModule
+    BrowserModule
   ],
   providers: [],
   bootstrap: [
